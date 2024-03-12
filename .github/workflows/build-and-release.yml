@@ -27,7 +27,7 @@ jobs:
       - name: Copy Files to Artifact Folder
         run: |
           New-Item -ItemType Directory -Force -Path .\artifact
-          Copy-Item SyberiaServer/manager/bin/Release/* .\artifact -Recurse
+          Copy-Item manager/bin/Release/* .\artifact -Recurse
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2

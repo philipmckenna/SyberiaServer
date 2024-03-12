@@ -62,12 +62,15 @@ jobs:
           body: "New release of SyberiaServerManager"
           upload_url: ${{ steps.create_release.outputs.upload_url }}
 
+      - name: Zip Artifacts
+        run: Compress-Archive -Path ./artifact/* -DestinationPath ./artifact.zip
+
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifact/
+          asset_path: ./artifact.zip
           asset_name: server-manager-artifacts.zip
           asset_content_type: application/zip

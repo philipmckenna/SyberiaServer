@@ -1,16 +1,20 @@
 name: Build and Release Database App
 
 on:
-  push:
-    branches:
-      - master
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version of the release"
+        required: true
 
 jobs:
   build-and-release:
     runs-on: windows-latest # Ensure the runner has Visual Studio 2019
 
     steps:
-      - uses: actions/checkout@v2 # Check out the repository code
+      - uses: actions/checkout@v2
+        with:
+          ref: master
 
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v1.0.2 # Set up MSBuild if not already available in the environment
@@ -35,14 +39,24 @@ jobs:
           name: server-manager-artifacts
           path: ./artifact/
 
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Create and Push Tag
+        run: |
+          git tag ${{ github.event.inputs.version }}
+          git push origin ${{ github.event.inputs.version }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
           draft: false
           prerelease: false
           body: "New release of SyberiaServerManager"

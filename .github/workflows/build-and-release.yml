@@ -1,0 +1,61 @@
+name: Build and Release Database App
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest # Ensure the runner has Visual Studio 2019
+
+    steps:
+      - uses: actions/checkout@v2 # Check out the repository code
+
+      - name: Setup MSBuild Path
+        uses: microsoft/setup-msbuild@v1.0.2 # Set up MSBuild if not already available in the environment
+
+      - name: Verify MSBuild Path
+        run: |
+          msbuild -version
+          where msbuild
+
+      - name: Restore NuGet Packages
+        run: msbuild -t:restore SyberiaAdditionalSoftware.sln
+
+      - name: Build SyberiaServerManager Project
+        run: msbuild SyberiaAdditionalSoftware.sln /p:Configuration=Release /p:Platform="Any CPU" /t:SyberiaServerManager:Rebuild
+
+      - name: Copy Files to Artifact Folder
+        run: |
+          New-Item -ItemType Directory -Force -Path .\artifact
+          Copy-Item SyberiaServer/manager/bin/Release/* .\artifact -Recurse
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: server-manager-artifacts
+          path: ./artifact/
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          body: "New release of SyberiaServerManager"
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifact/
+          asset_name: server-manager-artifacts.zip
+          asset_content_type: application/zip

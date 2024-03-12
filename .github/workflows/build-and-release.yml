@@ -15,13 +15,11 @@ jobs:
       - name: Setup MSBuild Path
         uses: microsoft/setup-msbuild@v1.0.2 # Set up MSBuild if not already available in the environment
 
-      - name: Verify MSBuild Path
-        run: |
-          msbuild -version
-          where msbuild
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v1.0.5
 
       - name: Restore NuGet Packages
-        run: msbuild -t:restore SyberiaAdditionalSoftware.sln
+        run: nuget restore SyberiaAdditionalSoftware.sln -Verbosity detailed
 
       - name: Build SyberiaServerManager Project
         run: msbuild SyberiaAdditionalSoftware.sln /p:Configuration=Release /p:Platform="Any CPU" /t:SyberiaServerManager:Rebuild

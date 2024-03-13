@@ -1,0 +1,31 @@
+name: Build PBO
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
+      - name: Build PBO
+        run: |
+          docker run --rm -v $PWD/src:/home -v $PWD:/output anrop/mikero-tools:latest makepbo /home /output/SyberiaServer.pbo
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt update
+          sudo apt install -y gh
+
+      - name: Upload PBO to Latest Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_RELEASE=$(gh release list -L 1 --json tagName -q '.[0].tagName')
+          gh release upload $LATEST_RELEASE SyberiaServer.pbo

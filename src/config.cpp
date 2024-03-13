@@ -12,17 +12,17 @@ class CfgMods {
 		class defs {
 			class gameScriptModule {
 				value = "";
-				files[] = {"SyberiaServer/scripts/3_Game"};
+				files[] = {"scripts/3_Game"};
 			};
 
 			class worldScriptModule {
 				value = "";
-				files[] = {"SyberiaServer/scripts/4_World"};
+				files[] = {"scripts/4_World"};
 			};
 
 			class missionScriptModule {
 				value = "";
-				files[] = {"SyberiaServer/scripts/5_Mission"};
+				files[] = {"scripts/5_Mission"};
 			};
 
 			class imageSets {
